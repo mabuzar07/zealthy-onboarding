@@ -3,22 +3,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || "zealthy",
-  process.env.DB_USER || "postgres",
-  process.env.DB_PASSWORD || "123456",
-  {
-    host: process.env.DB_HOST || "localhost",
-    dialect: "postgres",
-    logging: false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
-  }
-);
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is not defined");
+}
+
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  },
+  logging: false
+});
 
 const testConnection = async () => {
   try {
